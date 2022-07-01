@@ -15,7 +15,7 @@
     [super pushDemoViewControllerBlock:block];
     [VoiceRTCManager shareRtc].networkDelegate = [NetworkReachabilityManager sharedManager];
     [[VoiceRTCManager shareRtc] connect:@"cs"
-                             loginToken:[TokenCompoments token]
+                             loginToken:[LocalUserComponents userModel].loginToken
                                   block:^(BOOL result) {
         if (result) {
             VoiceRoomListsViewController *next = [[VoiceRoomListsViewController alloc] init];

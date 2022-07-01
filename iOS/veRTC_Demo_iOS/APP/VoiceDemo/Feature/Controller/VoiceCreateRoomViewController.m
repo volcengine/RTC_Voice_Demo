@@ -72,9 +72,10 @@
     sender.userInteractionEnabled = NO;
     __weak __typeof(self) wself = self;
     [VoiceRTMManager createMeeting:self.roomNameTextFieldView.text
-                                 userName:self.userNameTextFieldView.text
-                                    block:^(NSString * _Nonnull token, VoiceControlRoomModel * _Nonnull roomModel, NSArray<VoiceControlUserModel *> * _Nonnull lists, RTMACKModel * _Nonnull model) {
+                          userName:self.userNameTextFieldView.text
+                             block:^(NSString * _Nonnull token, VoiceControlRoomModel * _Nonnull roomModel, NSArray<VoiceControlUserModel *> * _Nonnull lists, RTMACKModel * _Nonnull model) {
         if (model.result) {
+            [PublicParameterCompoments share].roomId = roomModel.room_id;
             VoiceRoomViewController *next = [[VoiceRoomViewController alloc] init];
             next.token = token;
             next.roomModel = roomModel;
@@ -102,6 +103,9 @@
     if (!_roomNameTextFieldView) {
         _roomNameTextFieldView = [[VocieCreateTextFieldView alloc] initWithModify:NO];
         _roomNameTextFieldView.placeholderStr = @"请输入房间主题";
+        _roomNameTextFieldView.maxLimit = 20;
+        _roomNameTextFieldView.isCheckIllega = NO;
+        _roomNameTextFieldView.errorMessage = @"房间主题长度限制 1-20位";
     }
     return _roomNameTextFieldView;
 }

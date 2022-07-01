@@ -71,6 +71,7 @@
 #pragma mark - VoiceRoomTableViewDelegate
 
 - (void)voiceRoomTableView:(VoiceRoomTableView *)voiceRoomTableView didSelectRowAtIndexPath:(VoiceControlRoomModel *)model {
+    [PublicParameterCompoments share].roomId = model.room_id;
     VoiceRoomViewController *next = [[VoiceRoomViewController alloc] init];
     next.roomID = model.room_id;
     next.userName = [LocalUserComponents userModel].name;
@@ -126,6 +127,7 @@
 
 - (void)dealloc {
     [[VoiceRTCManager shareRtc] disconnect];
+    [PublicParameterCompoments clear];
 }
 
 

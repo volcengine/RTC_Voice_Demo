@@ -17,6 +17,7 @@
 #import "VoiceRoomViewController+SocketControl.h"
 #import "SystemAuthority.h"
 #import "VoiceRTMManager.h"
+#import "NetworkingTool.h"
 
 @interface VoiceRoomViewController () <VoiceRoomNavViewDelegate, VoiceRoomBottomViewDelegate, VoiceRTCManagerDelegate>
 
@@ -56,8 +57,7 @@
 
 #pragma mark - Notification
 
-- (void)voiceControlChange:(NSNotification *)notification {
-    NSDictionary *dic = (NSDictionary *)notification.object;
+- (void)voiceControlChange:(NSDictionary *)dic {
     if ([dic isKindOfClass:[NSDictionary class]]) {
         NSString *type = dic[@"type"];
         if ([type isEqualToString:@"resume"]) {
@@ -66,10 +66,7 @@
             [self updateRoomViewWithData];
         } else if ([type isEqualToString:@"exit"]) {
             [self hangUp];
-            VoiceControlUserModel *loginUserModel = [self currentLoginuserModel];
-            if (!loginUserModel.is_host) {
-                [[ToastComponents shareToastComponents] showWithMessage:@"房间已解散" delay:0.8];
-            }
+            [[ToastComponents shareToastComponents] showWithMessage:@"房间已解散" delay:0.8];
         } else {
             
         }
@@ -123,7 +120,7 @@
 - (void)receivedRaiseHandSucceedWithUser:(VoiceControlUserModel *)userModel {
     [self.roomView audienceRaisedHandsSuccess:userModel];
     [self.userListCompoments update];
-    if ([userModel.user_id isEqualToString:[LocalUserComponents userModel].voiceUid]) {
+    if ([userModel.user_id isEqualToString:[LocalUserComponents userModel].uid]) {
         VoiceControlUserModel *localUser = [self currentLoginuserModel];
         localUser.user_status = 2;
         localUser.is_mic_on = YES;
@@ -138,7 +135,7 @@
 - (void)receivedLowerHandSucceedWithUser:(NSString *)uid {
     [self.roomView hostLowerHandSuccess:uid];
     [self.userListCompoments update];
-    if ([uid isEqualToString:[LocalUserComponents userModel].voiceUid]) {
+    if ([uid isEqualToString:[LocalUserComponents userModel].uid]) {
         VoiceControlUserModel *localUser = [self currentLoginuserModel];
         localUser.user_status = 0;
         localUser.is_mic_on = NO;
@@ -154,7 +151,7 @@
 
 - (void)receivedHostChangeWithNewHostUid:(VoiceControlUserModel *)hostUser {
     [self.roomView updateHostUser:hostUser.user_id];
-    if ([[LocalUserComponents userModel].voiceUid isEqualToString:hostUser.user_id]) {
+    if ([[LocalUserComponents userModel].uid isEqualToString:hostUser.user_id]) {
         // 如果当前登录用户为新主持人
         // If the currently logged-in user is the new host
         [self.bottomView updateBottomLists:[self getBottomListsWithModel:[self currentLoginuserModel]]];
@@ -212,42 +209,27 @@
     }];
 }
 
-- (void)joinChannel {
-    if (NOEmptyStr(self.roomModel.room_id)) {
-        //Activate SDK
-        [VoiceRTCManager shareRtc].delegate = self;
-        [[VoiceRTCManager shareRtc] joinChannelWithToken:self.token
-                                                  roomID:self.roomModel.room_id
-                                                     uid:[LocalUserComponents userModel].voiceUid];
-        __weak __typeof(self)wself = self;
-        [VoiceRTCManager shareRtc].rtcJoinRoomBlock = ^(NSString *roomId, NSInteger errorCode, NSInteger joinType) {
-            if (joinType == 0) {
-                // 首次加入房间
-                if (errorCode == 0) {
-                    //Refresh the UI
-                    [wself updateRoomViewWithData];
-                } else {
-                    [wself showJoinFailedAlert];
-                }
-            } else {
-                // 断线重新加入房间
-            }
-        };
-    } else {
-        [self showJoinFailedAlert];
-    }
-}
-
-- (void)showJoinFailedAlert {
-    AlertActionModel *alertModel = [[AlertActionModel alloc] init];
-    alertModel.title = @"确定";
-    __weak __typeof(self)wself = self;
-    alertModel.alertModelClickBlock = ^(UIAlertAction * _Nonnull action) {
-        if ([action.title isEqualToString:@"确定"]) {
-            [wself hangUp];
+- (void)voiceReconnect {
+    __weak __typeof(self) wself = self;
+    [VoiceRTMManager reconnectWithBlock:^(VoiceControlRoomModel * _Nonnull roomModel, NSArray * _Nonnull users, RTMACKModel * _Nonnull ackModel) {
+        NSString *type = @"";
+        if (ackModel.result) {
+            type = @"resume";
+        } else if (ackModel.code == RTMStatusCodeUserIsInactive ||
+                   ackModel.code == RTMStatusCodeRoomDisbanded ||
+                   ackModel.code == RTMStatusCodeUserNotFound) {
+            type = @"exit";
+        } else {
+            
         }
-    };
-    [[AlertActionManager shareAlertActionManager] showWithMessage:@"加入房间失败，回到房间列表页" actions:@[alertModel]];
+        if (NOEmptyStr(type)) {
+            NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+            [dic setValue:type forKey:@"type"];
+            [dic setValue:roomModel forKey:@"roomModel"];
+            [dic setValue:users forKey:@"users"];
+            [wself voiceControlChange:dic];
+        }
+    }];
 }
 
 #pragma mark - VoiceRoomBottomViewDelegate
@@ -328,6 +310,33 @@
 
 #pragma mark - Private Action
 
+- (void)joinChannel {
+    if (NOEmptyStr(self.roomModel.room_id)) {
+        //Activate SDK
+        [VoiceRTCManager shareRtc].delegate = self;
+        [[VoiceRTCManager shareRtc] joinChannelWithToken:self.token
+                                                  roomID:self.roomModel.room_id
+                                                     uid:[LocalUserComponents userModel].uid];
+        __weak __typeof(self)wself = self;
+        [VoiceRTCManager shareRtc].rtcJoinRoomBlock = ^(NSString *roomId, NSInteger errorCode, NSInteger joinType) {
+            if (joinType == 0) {
+                // 首次加入房间
+                if (errorCode == 0) {
+                    //Refresh the UI
+                    [wself updateRoomViewWithData];
+                } else {
+                    [wself showJoinFailedAlert];
+                }
+            } else {
+                // 断线重新加入房间
+                [wself voiceReconnect];
+            }
+        };
+    } else {
+        [self showJoinFailedAlert];
+    }
+}
+
 - (void)updateRoomViewWithData {
     [self.roomView updateAllUser:self.userLists roomModel:self.roomModel];
     self.navView.roomModel = self.roomModel;
@@ -354,7 +363,7 @@
 }
 
 - (void)sendDownloadHand {
-    NSString *uid = [LocalUserComponents userModel].voiceUid;
+    NSString *uid = [LocalUserComponents userModel].uid;
     [self.roomView updateUserHand:uid isHand:NO];
     [self.roomView reloadData];
     [self.bottomView replaceButtonStatus:VoiceRoomBottomStatusDownHand newStatus:VoiceRoomBottomStatusRaiseHand];
@@ -428,7 +437,7 @@
 - (VoiceControlUserModel *)currentLoginuserModel {
     VoiceControlUserModel *currentModel = nil;
     for (VoiceControlUserModel *userModel in [self.roomView allUserLists]) {
-        if ([userModel.user_id isEqualToString:[LocalUserComponents userModel].voiceUid]) {
+        if ([userModel.user_id isEqualToString:[LocalUserComponents userModel].uid]) {
             currentModel = userModel;
             break;
         }
@@ -455,7 +464,6 @@
     return bottomLists;
 }
 
-
 - (void)addBgGradientLayer {
     UIColor *startColor = [UIColor colorFromHexString:@"#30394A"];
     UIColor *endColor = [UIColor colorFromHexString:@"#1D2129"];
@@ -466,6 +474,18 @@
     gradientLayer.startPoint = CGPointMake(.0, .0);
     gradientLayer.endPoint = CGPointMake(.0, 1.0);
     [self.view.layer addSublayer:gradientLayer];
+}
+
+- (void)showJoinFailedAlert {
+    AlertActionModel *alertModel = [[AlertActionModel alloc] init];
+    alertModel.title = @"确定";
+    __weak __typeof(self)wself = self;
+    alertModel.alertModelClickBlock = ^(UIAlertAction * _Nonnull action) {
+        if ([action.title isEqualToString:@"确定"]) {
+            [wself hangUp];
+        }
+    };
+    [[AlertActionManager shareAlertActionManager] showWithMessage:@"加入房间失败，回到房间列表页" actions:@[alertModel]];
 }
 
 #pragma mark - Getter

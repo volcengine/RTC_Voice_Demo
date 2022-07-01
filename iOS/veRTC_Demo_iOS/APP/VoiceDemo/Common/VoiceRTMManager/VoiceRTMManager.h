@@ -56,6 +56,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)getAudiencesWithBlock:(void (^ __nullable)(NSArray<VoiceControlUserModel *> *userLists, RTMACKModel *model))block;
 
++ (void)reconnectWithBlock:(void (^)(VoiceControlRoomModel *, NSArray *users, RTMACKModel * _Nonnull))block;
+
 #pragma mark - Control Voice status
 
 /*

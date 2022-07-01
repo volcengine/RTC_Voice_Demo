@@ -37,10 +37,6 @@
     //开启/关闭发言者音量键控
     //Turn on/off speaker volume keying
     [self.rtcEngineKit setAudioVolumeIndicationInterval:200];
-    
-    //设置用户为隐身状态
-    //Set user to incognito state
-    [self.rtcEngineKit setUserVisibility:NO];
 
     //加入房间，开始连麦,需要申请AppId和Token
     //Join the room, start connecting the microphone, you need to apply for AppId and Token
@@ -56,7 +52,10 @@
                               roomId:roomID
                             userInfo:userInfo
                        rtcRoomConfig:config];
-    self.roomID = roomID;
+    
+    //设置用户为隐身状态
+    //Set user to incognito state
+    [self.rtcEngineKit setUserVisibility:NO];
 }
 
 #pragma mark - rtc method
@@ -65,11 +64,12 @@
     //开启/关闭 本地音频采集
     //Turn on/off local audio capture
     if (isCoHost) {
-        [self.rtcEngineKit startAudioCapture];
         [self.rtcEngineKit setUserVisibility:YES];
+        [self.rtcEngineKit startAudioCapture];
+        [self.rtcEngineKit publishStream:ByteRTCMediaStreamTypeAudio];
     } else {
-        [self.rtcEngineKit stopAudioCapture];
         [self.rtcEngineKit setUserVisibility:NO];
+        [self.rtcEngineKit stopAudioCapture];
     }
 }
 
@@ -77,9 +77,9 @@
     //开启/关闭 本地音频推流
     //Turn on/off local audio stream
     if (isMute) {
-        [self.rtcEngineKit muteLocalAudio:ByteRTCMuteStateOn];
+        [self.rtcEngineKit unpublishStream:ByteRTCMediaStreamTypeAudio];
     } else {
-        [self.rtcEngineKit muteLocalAudio:ByteRTCMuteStateOff];
+        [self.rtcEngineKit publishStream:ByteRTCMediaStreamTypeAudio];
     }
 }
 
@@ -89,7 +89,6 @@
     [self makeCoHost:NO];
     [self muteLocalAudioStream:YES];
     [self.rtcEngineKit leaveRoom];
-    self.roomID = @"";
 }
 
 #pragma mark - ByteRTCEngineDelegate

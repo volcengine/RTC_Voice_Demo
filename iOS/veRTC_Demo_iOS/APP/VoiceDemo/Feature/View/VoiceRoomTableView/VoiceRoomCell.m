@@ -95,15 +95,15 @@
     if (!text || !label) {
         return;
     }
-    text = [text stringByRemovingPercentEncoding];
+    NSString *message = [text stringByRemovingPercentEncoding];
     
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineSpacing = lineSpace;
     paragraphStyle.lineBreakMode = label.lineBreakMode;
     paragraphStyle.alignment = label.textAlignment;
     
-    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text];
-    [attributedString addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, [text length])];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:message];
+    [attributedString addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, [message length])];
     label.attributedText = attributedString;
 }
 

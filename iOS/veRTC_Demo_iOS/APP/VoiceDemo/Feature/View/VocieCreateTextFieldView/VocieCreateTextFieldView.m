@@ -28,6 +28,7 @@
     if (self) {
         self.clipsToBounds = NO;
         _isIllega = NO;
+        _isCheckIllega = YES;
         self.backgroundColor = [UIColor clearColor];
         
         [self addSubview:self.textField];
@@ -136,6 +137,9 @@
     BOOL isIllega = ![LocalUserComponents isMatchUserName:textField.text];
     if (self.isOnlyNumber) {
         isIllega = ![LocalUserComponents isMatchNumber:textField.text];
+    }
+    if (!_isCheckIllega) {
+        isIllega = NO;
     }
     BOOL isMaxLimit = textField.text.length > maxLimit;
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(dismissErrorLabel:) object:textField];
