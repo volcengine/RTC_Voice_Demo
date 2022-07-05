@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="chat_room_leave" type="id" />
+    <item name="chat_room_id" type="id" />
+    <item name="chat_room_duration" type="id" />
+    <item name="chat_room_host_prefix" type="id" />
+</resources>
