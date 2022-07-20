@@ -47,7 +47,7 @@
 3. 进入 `RTC_Voice_Demo-main/iOS/veRTC_Demo_iOS` 根目录，使用 Xcode 打开 `veRTC_Demo.xcworkspace`
 	
 
-<img src="https://lf6-volc-editor.volccdn.com/obj/volcfe/sop-public/upload_956c5b59c6da969b4d89ed9e4038a661" width="500px" >
+<img src="https://lf3-volc-editor.volccdn.com/obj/volcfe/sop-public/upload_b479ae8a464cf80f054ca9f9ac6bc2bc" width="500px" >
 
 4. 在 Xcode 中打开 `Pods/Development Pods/Core/BuildConfig.h` 文件
 	
