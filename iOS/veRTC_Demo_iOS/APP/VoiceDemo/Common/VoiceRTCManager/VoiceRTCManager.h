@@ -1,6 +1,4 @@
 #import "BaseRTCManager.h"
-#import "VoiceRTCManager.h"
-#import <VolcEngineRTC/objc/rtc/ByteRTCEngineKit.h>
 #import "VoiceRoomParamInfoModel.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -25,22 +23,24 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Base Method
 
 /**
- * Join room
+ * Join RTC room
  * @param token token
  * @param roomID roomID
  * @param uid uid
  */
-- (void)joinChannelWithToken:(NSString *)token roomID:(NSString *)roomID uid:(NSString *)uid;
+- (void)joinRTCRoomWithToken:(NSString *)token
+                      roomID:(NSString *)roomID
+                         uid:(NSString *)uid;
 
 /*
- * Switch local audio capture
- * @param enable ture:Turn on audio capture false：Turn off audio capture
+ * CoHost role switching
+ * @param enable ture:Turn on mask CoHost false：Turn off Lost CoHost
  */
 - (void)makeCoHost:(BOOL)isCoHost;
 
 /*
- * Switch local audio capture
- * @param mute ture:Turn on audio capture false：Turn off audio capture
+ * Switch local audio publish
+ * @param mute ture:Turn on audio publish false：Turn off audio publish
  */
 - (void)muteLocalAudioStream:(BOOL)isMute;
 

@@ -2,8 +2,8 @@
 //  VoiceRoomViewController.h
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/18.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/18.
+//  
 //
 
 #import <UIKit/UIKit.h>
@@ -13,12 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface VoiceRoomViewController : UIViewController
 
-@property (nonatomic, copy) NSString *token;
-@property (nonatomic, strong) VoiceControlRoomModel *roomModel;
-@property (nonatomic, copy) NSArray<VoiceControlUserModel *> *userLists;
-
-@property (nonatomic, strong) NSString *roomID;
-@property (nonatomic, strong) NSString *userName;
+- (instancetype)initWithToken:(NSString *)token
+                    roomModel:(VoiceControlRoomModel *)roomModel
+                    userLists:(NSArray<VoiceControlUserModel *> *)userLists;
 
 - (void)addUser:(VoiceControlUserModel *)userModel;
 

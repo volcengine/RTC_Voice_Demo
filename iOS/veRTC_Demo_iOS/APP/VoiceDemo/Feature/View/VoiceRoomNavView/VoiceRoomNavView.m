@@ -2,18 +2,18 @@
 //  RoomNavView.m
 //  quickstart
 //
-//  Created by bytedance on 2021/3/23.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/3/23.
+//  
 //
 
 #import "VoiceRoomNavView.h"
 #import "GCDTimer.h"
-#import "VoiceAvatarCompoments.h"
+#import "VoiceAvatarComponent.h"
 
 @interface VoiceRoomNavView ()
 
 @property (nonatomic, strong) BaseButton *hangeupButton;
-@property (nonatomic, strong) VoiceAvatarCompoments *avatarCompoments;
+@property (nonatomic, strong) VoiceAvatarComponent *avatarComponent;
 
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, strong) UILabel *roomIdLabel;
@@ -71,7 +71,7 @@
     }
     self.meetingTime = time;
     
-    self.avatarCompoments.text = [LocalUserComponents userModel].name;
+    self.avatarComponent.text = [LocalUserComponent userModel].name;
 }
 
 
@@ -94,8 +94,8 @@
         make.height.width.mas_equalTo(24.f);
     }];
     
-    [self addSubview:self.avatarCompoments];
-    [self.avatarCompoments mas_makeConstraints:^(MASConstraintMaker *make) {
+    [self addSubview:self.avatarComponent];
+    [self.avatarComponent mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self).mas_offset(-16.f);
         make.centerY.equalTo(self).mas_offset([DeviceInforTool getStatusBarHight]/2);
         make.height.width.mas_equalTo(30);
@@ -167,14 +167,14 @@
     return _lineView;
 }
 
-- (VoiceAvatarCompoments *)avatarCompoments {
-    if (!_avatarCompoments) {
-        _avatarCompoments = [[VoiceAvatarCompoments alloc] init];
-        _avatarCompoments.layer.cornerRadius = 15;
-        _avatarCompoments.layer.masksToBounds = YES;
-        _avatarCompoments.fontSize = 16;
+- (VoiceAvatarComponent *)avatarComponent {
+    if (!_avatarComponent) {
+        _avatarComponent = [[VoiceAvatarComponent alloc] init];
+        _avatarComponent.layer.cornerRadius = 15;
+        _avatarComponent.layer.masksToBounds = YES;
+        _avatarComponent.fontSize = 16;
     }
-    return _avatarCompoments;
+    return _avatarComponent;
 }
 
 - (BaseButton *)hangeupButton {

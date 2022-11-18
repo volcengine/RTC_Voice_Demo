@@ -2,8 +2,8 @@
 //  VoiceRoomView.m
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/21.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/21.
+//  
 //
 
 #import "VoiceRoomView.h"
@@ -76,7 +76,7 @@
     dispatch_semaphore_wait(self.lock, DISPATCH_TIME_FOREVER);
     VoiceControlUserModel *deleteUserModel = nil;
     for (VoiceControlUserModel *model in self.hostLists) {
-        if ([model.user_id isEqualToString:user.user_id]) {
+        if ([model.uid isEqualToString:user.uid]) {
             deleteUserModel = model;
         }
     }
@@ -88,7 +88,7 @@
     VoiceControlUserModel *replaceUserModel = nil;
     for (int i = 0; i < self.audienceLists.count; i++) {
         VoiceControlUserModel *currentUser = self.audienceLists[i];
-        if ([currentUser.user_id isEqualToString:user.user_id]) {
+        if ([currentUser.uid isEqualToString:user.uid]) {
             replaceIndex = i;
             replaceUserModel = user;
             break;
@@ -107,7 +107,7 @@
     dispatch_semaphore_wait(self.lock, DISPATCH_TIME_FOREVER);
     VoiceControlUserModel *leaveUserModel = nil;
     for (VoiceControlUserModel *model in self.hostLists) {
-        if ([model.user_id isEqualToString:user]) {
+        if ([model.uid isEqualToString:user]) {
             leaveUserModel = model;
         }
     }
@@ -117,7 +117,7 @@
         leaveUserModel = nil;
     }
     for (VoiceControlUserModel *model in self.audienceLists) {
-        if ([model.user_id isEqualToString:user]) {
+        if ([model.uid isEqualToString:user]) {
             leaveUserModel = model;
         }
     }
@@ -133,7 +133,7 @@
     VoiceControlUserModel *newHostUser = nil;
     VoiceControlUserModel *deleteHostUser = nil;
     for (VoiceControlUserModel *model in self.audienceLists) {
-        if ([model.user_id isEqualToString:userModel.user_id]) {
+        if ([model.uid isEqualToString:userModel.uid]) {
             newHostUser = userModel;
             deleteHostUser = model;
             break;
@@ -151,7 +151,7 @@
     dispatch_semaphore_wait(self.lock, DISPATCH_TIME_FOREVER);
     VoiceControlUserModel *newAudienceUser = nil;
     for (VoiceControlUserModel *model in self.hostLists) {
-        if ([model.user_id isEqualToString:uid]) {
+        if ([model.uid isEqualToString:uid]) {
             newAudienceUser = model;
             newAudienceUser.user_status = 0;
         }
@@ -166,7 +166,7 @@
 
 - (void)updateHostVolume:(NSDictionary<NSString *, NSNumber *> *_Nonnull)volumeInfo {
     for (VoiceControlUserModel *model in self.hostLists) {
-        NSNumber *volume = [volumeInfo objectForKey:model.user_id];
+        NSNumber *volume = [volumeInfo objectForKey:model.uid];
         model.volume = [volume integerValue];
     }
 }
@@ -174,7 +174,7 @@
 - (void)updateHostUser:(NSString *)uid {
     dispatch_semaphore_wait(self.lock, DISPATCH_TIME_FOREVER);
     for (VoiceControlUserModel *model in self.hostLists) {
-        if ([model.user_id isEqualToString:uid]) {
+        if ([model.uid isEqualToString:uid]) {
             model.is_host = YES;
         } else {
             model.is_host = NO;
@@ -186,7 +186,7 @@
 - (void)updateUserHand:(NSString *)uid isHand:(BOOL)isHand {
     dispatch_semaphore_wait(self.lock, DISPATCH_TIME_FOREVER);
     for (VoiceControlUserModel *model in self.audienceLists) {
-        if ([model.user_id isEqualToString:uid]) {
+        if ([model.uid isEqualToString:uid]) {
             model.user_status = isHand ? 1 : 0;
             break;
         }
@@ -197,7 +197,7 @@
 - (void)updateUserMic:(NSString *)uid isMute:(BOOL)isMute {
     dispatch_semaphore_wait(self.lock, DISPATCH_TIME_FOREVER);
     for (VoiceControlUserModel *model in self.hostLists) {
-        if ([model.user_id isEqualToString:uid]) {
+        if ([model.uid isEqualToString:uid]) {
             model.is_mic_on = !isMute;
             break;
         }

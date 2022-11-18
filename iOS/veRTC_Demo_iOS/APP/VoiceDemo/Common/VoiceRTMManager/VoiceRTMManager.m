@@ -2,10 +2,11 @@
 //  VoiceRTMManager.m
 //  SceneRTCDemo
 //
-//  Created by bytedance on 2021/3/16.
+//  Created by on 2021/3/16.
 //
 
 #import "VoiceRTMManager.h"
+#import "JoinRTSParams.h"
 
 @implementation VoiceRTMManager
 
@@ -13,7 +14,7 @@
 
 + (void)getMeetingsWithBlock:(void (^)(NSArray *lists,
                                        RTMACKModel *model))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csGetMeetings"
                                        with:dic
                                       block:^(RTMACKModel * _Nonnull ackModel) {
@@ -38,9 +39,9 @@
                                 NSArray<VoiceControlUserModel *> *lists,
                                 RTMACKModel *model))block {
     NSString *encodedString = [roomName stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLUserAllowedCharacterSet]];
-    NSDictionary *dic = @{@"room_name" : encodedString,
-                          @"user_name" : userName};
-    dic = [PublicParameterCompoments addTokenToParams:dic];
+    NSDictionary *dic = @{@"room_name" : encodedString ?: @"",
+                          @"user_name" : userName ?: @""};
+    dic = [JoinRTSParams addTokenToParams:dic];
     
     [[VoiceRTCManager shareRtc] emitWithAck:@"csCreateMeeting"
                                        with:dic
@@ -63,18 +64,16 @@
     }];
 }
 
-+ (void)joinVoice:(NSString *)roomID
-         userName:(NSString *)userName
++ (void)joinVoice:(NSString *)userName
             block:(void (^)(NSString *token,
                             VoiceControlRoomModel *roomModel,
                             NSArray<VoiceControlUserModel *> *lists,
                             RTMACKModel *model))block {
     NSDictionary *dic = @{};
-    if (NOEmptyStr(roomID) && NOEmptyStr(userName)) {
-        dic = @{@"room_id" : roomID,
-                @"user_name" : userName};
+    if (NOEmptyStr(userName)) {
+        dic = @{@"user_name" : userName ?: @""};
     }
-    dic = [PublicParameterCompoments addTokenToParams:dic];
+    dic = [JoinRTSParams addTokenToParams:dic];
     
     [[VoiceRTCManager shareRtc] emitWithAck:@"csJoinMeeting"
                                        with:dic
@@ -101,12 +100,12 @@
 }
 
 + (void)leaveVoice:(void (^)(RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csLeaveMeeting" with:dic block:block];
 }
 
 + (void)getRaiseHandsWithBlock:(void (^)(NSArray<VoiceControlUserModel *> * _Nonnull, RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csGetRaiseHands"
                                        with:dic
                                       block:^(RTMACKModel * _Nonnull ackModel) {
@@ -125,7 +124,7 @@
 }
 
 + (void)getAudiencesWithBlock:(void (^)(NSArray<VoiceControlUserModel *> * _Nonnull, RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csGetAudiences"
                                        with:dic
                                       block:^(RTMACKModel * _Nonnull ackModel) {
@@ -144,7 +143,7 @@
 }
 
 + (void)reconnectWithBlock:(void (^)(VoiceControlRoomModel *, NSArray *users, RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     
     [[VoiceRTCManager shareRtc] emitWithAck:@"csReconnect" with:dic block:^(RTMACKModel * _Nonnull ackModel) {
         VoiceControlRoomModel *roomModel = nil;
@@ -170,7 +169,7 @@
 #pragma mark - Control Voice status
 
 + (void)inviteMic:(NSString *)userId block:(void (^)(RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     NSMutableDictionary *mutableDic = [dic mutableCopy];
     [mutableDic setValue:userId ?: @"" forKey:@"user_id"];
     dic = [mutableDic copy];
@@ -180,21 +179,21 @@
 }
 
 + (void)confirmMicWithBlock:(void (^)(RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csConfirmMic"
                                        with:dic
                                       block:block];
 }
 
 + (void)raiseHandsMicWithBlock:(void (^)(RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csRaiseHandsMic"
                                        with:dic
                                       block:block];
 }
 
 + (void)agreeMic:(NSString *)userId block:(void (^)(RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     NSMutableDictionary *mutableDic = [dic mutableCopy];
     [mutableDic setValue:userId ?: @"" forKey:@"user_id"];
     dic = [mutableDic copy];
@@ -204,14 +203,14 @@
 }
 
 + (void)offSelfMicWithBlock:(void (^)(RTMACKModel * _Nonnull))block {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csOffSelfMic"
                                        with:dic
                                       block:block];
 }
 
 + (void)offMic:(NSString *)userId block:(void (^)(RTMACKModel * _Nonnull))block{
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     NSMutableDictionary *mutableDic = [dic mutableCopy];
     [mutableDic setValue:userId ?: @"" forKey:@"user_id"];
     dic = [mutableDic copy];
@@ -221,12 +220,12 @@
 }
                                                                       
 + (void)muteMic {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csMuteMic" with:dic block:nil];
 }
 
 + (void)unmuteMic {
-    NSDictionary *dic = [PublicParameterCompoments addTokenToParams:nil];
+    NSDictionary *dic = [JoinRTSParams addTokenToParams:nil];
     [[VoiceRTCManager shareRtc] emitWithAck:@"csUnmuteMic" with:dic block:nil];
 }
 
@@ -344,7 +343,7 @@
             roomID = noticeModel.data[@"room_id"];
         }
         if (block) {
-            block([roomID isEqualToString:[PublicParameterCompoments share].roomId]);
+            block([roomID isEqualToString:[PublicParameterComponent share].roomId]);
         }
     }];
 }

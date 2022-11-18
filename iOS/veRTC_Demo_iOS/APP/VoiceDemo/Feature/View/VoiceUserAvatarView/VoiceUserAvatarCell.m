@@ -2,16 +2,16 @@
 //  VoiceUserAvatarCell.m
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/19.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/19.
+//  
 //
 
 #import "VoiceUserAvatarCell.h"
-#import "VoiceAvatarCompoments.h"
+#import "VoiceAvatarComponent.h"
 
 @interface VoiceUserAvatarCell ()
 
-@property (nonatomic, strong) VoiceAvatarCompoments *avatarView;
+@property (nonatomic, strong) VoiceAvatarComponent *avatarView;
 @property (nonatomic, strong) UILabel *titleLabel;
 
 // Audience
@@ -88,8 +88,8 @@
 
 - (void)setModel:(VoiceControlUserModel *)model {
     _model = model;
-    self.titleLabel.text = model.user_name;
-    self.avatarView.text = model.user_name;
+    self.titleLabel.text = model.name;
+    self.avatarView.text = model.name;
     
     if (self.status == AvatarCellStatusAudience) {
         self.audienceRaiseHandImageView.hidden = model.user_status == 1 ? NO : YES;
@@ -119,9 +119,9 @@
     return _titleLabel;
 }
 
-- (VoiceAvatarCompoments *)avatarView {
+- (VoiceAvatarComponent *)avatarView {
     if (_avatarView == nil) {
-        _avatarView = [[VoiceAvatarCompoments alloc] init];
+        _avatarView = [[VoiceAvatarComponent alloc] init];
         _avatarView.layer.masksToBounds = YES;
     }
     return _avatarView;

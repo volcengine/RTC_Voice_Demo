@@ -2,18 +2,18 @@
 //  VoiceRoomCell.m
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/18.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/18.
+//  
 //
 
 #import "VoiceRoomCell.h"
-#import "VoiceAvatarCompoments.h"
+#import "VoiceAvatarComponent.h"
 
 @interface VoiceRoomCell ()
 
 @property (nonatomic, strong) UIView *bgView;
 @property (nonatomic, strong) UILabel *roomNameLabel;
-@property (nonatomic, strong) VoiceAvatarCompoments *avatarView;
+@property (nonatomic, strong) VoiceAvatarComponent *avatarView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *userNumberLabel;
 @property (nonatomic, strong) UILabel *roomIDLabel;
@@ -27,7 +27,7 @@
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.contentView.backgroundColor = [UIColor clearColor];
-        [self createUIComponents];
+        [self createUIComponent];
     }
     return self;
 }
@@ -43,7 +43,7 @@
 
 #pragma mark - Private Action
 
-- (void)createUIComponents {
+- (void)createUIComponent {
     [self.contentView addSubview:self.bgView];
     [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.contentView).offset(20);
@@ -119,9 +119,9 @@
     return _roomNameLabel;
 }
 
-- (VoiceAvatarCompoments *)avatarView {
+- (VoiceAvatarComponent *)avatarView {
     if (!_avatarView) {
-        _avatarView = [[VoiceAvatarCompoments alloc] init];
+        _avatarView = [[VoiceAvatarComponent alloc] init];
         _avatarView.layer.cornerRadius = 20;
         _avatarView.layer.masksToBounds = YES;
         _avatarView.fontSize = 20;

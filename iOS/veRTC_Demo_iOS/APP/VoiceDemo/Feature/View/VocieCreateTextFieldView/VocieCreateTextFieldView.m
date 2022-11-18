@@ -2,8 +2,8 @@
 //  VocieTextFileView.m
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/21.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/21.
+//  
 //
 
 #import "VocieCreateTextFieldView.h"
@@ -134,9 +134,9 @@
     }
     
     NSInteger maxLimit = self.maxLimit;
-    BOOL isIllega = ![LocalUserComponents isMatchUserName:textField.text];
+    BOOL isIllega = ![LocalUserComponent isMatchUserName:textField.text];
     if (self.isOnlyNumber) {
-        isIllega = ![LocalUserComponents isMatchNumber:textField.text];
+        isIllega = ![LocalUserComponent isMatchNumber:textField.text];
     }
     if (!_isCheckIllega) {
         isIllega = NO;

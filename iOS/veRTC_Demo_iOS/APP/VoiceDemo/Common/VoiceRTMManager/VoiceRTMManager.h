@@ -2,7 +2,7 @@
 //  VoiceRTMManager.h
 //  SceneRTCDemo
 //
-//  Created by bytedance on 2021/3/16.
+//  Created by on 2021/3/16.
 //
 
 #import <Foundation/Foundation.h>
@@ -34,9 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @param loginModel Login user data
  * @param block Callback
  */
-+ (void)joinVoice:(NSString *)roomID
-         userName:(NSString *)userName
-            block:(void (^ __nullable)(NSString *token,
++ (void)joinVoice:(NSString *)userName
+            block:(void (^)(NSString *token,
                             VoiceControlRoomModel *roomModel,
                             NSArray<VoiceControlUserModel *> *lists,
                             RTMACKModel *model))block;

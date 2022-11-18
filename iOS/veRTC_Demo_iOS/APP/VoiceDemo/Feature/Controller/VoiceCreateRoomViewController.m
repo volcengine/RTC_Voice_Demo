@@ -2,8 +2,8 @@
 //  CreateRoomViewController.m
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/18.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/18.
+//  
 //
 
 #import "VoiceCreateRoomViewController.h"
@@ -48,9 +48,7 @@
         make.top.equalTo(self.userNameTextFieldView.mas_bottom).offset(40);
     }];
     
-    self.userNameTextFieldView.text = [LocalUserComponents userModel].name;
-    
-    [self.roomNameTextFieldView becomeFirstResponder];
+    self.userNameTextFieldView.text = [LocalUserComponent userModel].name;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -59,36 +57,39 @@
     self.navTitle = @"语音沙龙";
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    [self.roomNameTextFieldView becomeFirstResponder];
+}
+
 - (void)joinButtonAction:(UIButton *)sender {
     if (IsEmptyStr(self.roomNameTextFieldView.text)) {
-        [[ToastComponents shareToastComponents] showWithMessage:@"输入不得为空"];
+        [[ToastComponent shareToastComponent] showWithMessage:@"输入不得为空"];
         return;
     }
     if (IsEmptyStr(self.userNameTextFieldView.text) ||
-        ![LocalUserComponents isMatchUserName:self.userNameTextFieldView.text]) {
-        [[ToastComponents shareToastComponents] showWithMessage:@"输入不得为空"];
+        ![LocalUserComponent isMatchUserName:self.userNameTextFieldView.text]) {
+        [[ToastComponent shareToastComponent] showWithMessage:@"输入不得为空"];
         return;
     }
-    sender.userInteractionEnabled = NO;
+    [[ToastComponent shareToastComponent] showLoading];
     __weak __typeof(self) wself = self;
     [VoiceRTMManager createMeeting:self.roomNameTextFieldView.text
                           userName:self.userNameTextFieldView.text
                              block:^(NSString * _Nonnull token, VoiceControlRoomModel * _Nonnull roomModel, NSArray<VoiceControlUserModel *> * _Nonnull lists, RTMACKModel * _Nonnull model) {
         if (model.result) {
-            [PublicParameterCompoments share].roomId = roomModel.room_id;
-            VoiceRoomViewController *next = [[VoiceRoomViewController alloc] init];
-            next.token = token;
-            next.roomModel = roomModel;
-            next.userLists = lists;
+            [PublicParameterComponent share].roomId = roomModel.room_id;
+            VoiceRoomViewController *next = [[VoiceRoomViewController alloc] initWithToken:token roomModel:roomModel userLists:lists];
             [wself.navigationController pushViewController:next animated:YES];
             
-            BaseUserModel *userModel = [LocalUserComponents userModel];
+            BaseUserModel *userModel = [LocalUserComponent userModel];
             userModel.name = wself.userNameTextFieldView.text;
-            [LocalUserComponents updateLocalUserModel:userModel];
+            [LocalUserComponent updateLocalUserModel:userModel];
         } else {
-            [[ToastComponents shareToastComponents] showWithMessage:model.message];
+            [[ToastComponent shareToastComponent] showWithMessage:model.message];
         }
-        sender.userInteractionEnabled = YES;
+        [[ToastComponent shareToastComponent] dismiss];
     }];
 }
 

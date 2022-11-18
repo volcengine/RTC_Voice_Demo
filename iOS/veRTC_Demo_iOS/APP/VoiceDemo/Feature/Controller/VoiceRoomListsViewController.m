@@ -2,8 +2,8 @@
 //  VoiceRoomViewController.m
 //  veRTC_Demo
 //
-//  Created by bytedance on 2021/5/18.
-//  Copyright © 2021 . All rights reserved.
+//  Created by on 2021/5/18.
+//  
 //
 
 #import "VoiceRoomListsViewController.h"
@@ -45,36 +45,30 @@
     
     self.navTitle = @"语音沙龙";
     self.rightTitle = @"刷新";
-    
     [self loadDataWithGetLists];
 }
 
 - (void)rightButtonAction:(BaseButton *)sender {
     [super rightButtonAction:sender];
-    
     [self loadDataWithGetLists];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
 }
 
 #pragma mark - load data
 
 - (void)loadDataWithGetLists {
+    [[ToastComponent shareToastComponent] showLoading];
+    __weak __typeof(self) wself = self;
     [VoiceRTMManager getMeetingsWithBlock:^(NSArray * _Nonnull lists, RTMACKModel * _Nonnull model) {
-        self.roomTableView.dataLists = lists;
+        wself.roomTableView.dataLists = lists;
+        [[ToastComponent shareToastComponent] dismiss];
     }];
 }
 
 #pragma mark - VoiceRoomTableViewDelegate
 
 - (void)voiceRoomTableView:(VoiceRoomTableView *)voiceRoomTableView didSelectRowAtIndexPath:(VoiceControlRoomModel *)model {
-    [PublicParameterCompoments share].roomId = model.room_id;
+    [PublicParameterComponent share].roomId = model.room_id;
     VoiceRoomViewController *next = [[VoiceRoomViewController alloc] init];
-    next.roomID = model.room_id;
-    next.userName = [LocalUserComponents userModel].name;
     [self.navigationController pushViewController:next animated:YES];
 }
 
@@ -127,7 +121,7 @@
 
 - (void)dealloc {
     [[VoiceRTCManager shareRtc] disconnect];
-    [PublicParameterCompoments clear];
+    [PublicParameterComponent clear];
 }
 
 
