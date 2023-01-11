@@ -20,6 +20,7 @@ import com.ss.video.rtc.demo.basic_module.utils.WindowUtils;
 import com.volcengine.vertcdemo.common.LengthFilterWithCallback;
 import com.volcengine.vertcdemo.core.SolutionDataManager;
 import com.volcengine.vertcdemo.core.net.ErrorTool;
+import com.volcengine.vertcdemo.utils.DebounceClickListener;
 import com.volcengine.vertcdemo.voice.core.Constants;
 import com.volcengine.vertcdemo.voice.core.VoiceDataManger;
 import com.volcengine.vertcdemo.voice.core.VoiceRTCManager;
@@ -34,6 +35,8 @@ import com.volcengine.vertcdemo.voice.feature.chatroommain.ChatRoomActivity;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 public class CreateChatRoomActivity extends BaseActivity {
@@ -113,7 +116,7 @@ public class CreateChatRoomActivity extends BaseActivity {
 
         mUserNameInput.removeTextChangedListener(mUserNameTextWatcher);
         mUserNameInput.addTextChangedListener(mUserNameTextWatcher);
-        mRoomConfirmBtn.setOnClickListener((v) -> {
+        mRoomConfirmBtn.setOnClickListener(DebounceClickListener.create((v) -> {
             String roomTitle = mRoomTitleInput.getText().toString().trim();
             String userName = mUserNameInput.getText().toString().trim();
             if (TextUtils.isEmpty(roomTitle) || TextUtils.isEmpty(userName)) {
@@ -124,8 +127,12 @@ public class CreateChatRoomActivity extends BaseActivity {
                 return;
             }
             VoiceRTSClient rtsClient = VoiceRTCManager.getRTSClient();
-            if (rtsClient != null) {
-                rtsClient.requestCreateRoom(roomTitle, userName, new IRequestCallback<CreateJoinRoomResult>() {
+            if (rtsClient == null) {
+                return;
+            }
+            try {
+                final String encodeRoomTitle = URLEncoder.encode(roomTitle, "UTF-8");
+                rtsClient.requestCreateRoom(encodeRoomTitle, userName, new IRequestCallback<CreateJoinRoomResult>() {
                     @Override
                     public void onSuccess(CreateJoinRoomResult data) {
                         onCreateJoinRoomResult(data);
@@ -136,8 +143,10 @@ public class CreateChatRoomActivity extends BaseActivity {
                         SafeToast.show(ErrorTool.getErrorMessageByErrorCode(errorCode, message));
                     }
                 });
+            } catch (UnsupportedEncodingException ignored) {
+
             }
-        });
+        }));
         SolutionDemoEventManager.register(this);
     }
 

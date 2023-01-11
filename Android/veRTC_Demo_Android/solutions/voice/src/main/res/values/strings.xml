@@ -6,4 +6,7 @@
     <string name="scene_voice_salon">语音沙龙</string>
     <string name="no_operation_permission">没有操作权限</string>
     <string name="system_busy_try_again">系统繁忙，请稍后重试</string>
+    <string name="self_become_host">您已成为主播</string>
+    <string name="voice_invite_success">已邀请</string>
+    <string name="voice_invite_failed">操作失败，请稍后重试</string>
 </resources>

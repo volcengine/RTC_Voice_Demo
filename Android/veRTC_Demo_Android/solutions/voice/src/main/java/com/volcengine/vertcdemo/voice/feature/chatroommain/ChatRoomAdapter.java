@@ -31,8 +31,8 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private ChatRoomInfo mChatRoomInfo;
     private final Set<String> mHighlightUids = new HashSet<>();
-    private final List<ChatUserInfo> mChatRoomListenerList = new ArrayList<>();
-    private final List<ChatUserInfo> mChatRoomSpeakerList = new ArrayList<>();
+    private final List<ChatUserInfo> mChatRoomListenerList = new ArrayList<>(); // 其他听众用户列表
+    private final List<ChatUserInfo> mChatRoomSpeakerList = new ArrayList<>(); // 嘉宾用户列表
 
     @NonNull
     @Override
@@ -65,6 +65,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (payloads.contains(HEADER_USERS_CHANGED)) {
             if (holder instanceof ChatRoomHeaderViewHolder) {
                 ((ChatRoomHeaderViewHolder) holder).notifyUserListChanged(mChatRoomSpeakerList);
+                ((ChatRoomHeaderViewHolder) holder).notifyListenerListChanged(mChatRoomListenerList.size());
             }
         } else if (payloads.contains(HEADER_LISTENER_CHANGED)) {
             if (holder instanceof ChatRoomHeaderViewHolder) {
@@ -184,6 +185,11 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    /**
+     * 用户角色发生变化
+     * @param uid 用户id
+     * @param isSpeaker 是不是变成嘉宾
+     */
     public void onUserRoleChange(String uid, boolean isSpeaker) {
         ChatUserInfo userInfo = null;
         if (isSpeaker) {
@@ -231,6 +237,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 notifyItemInserted(mChatRoomListenerList.size() + 1);
             }
         }
+        notifyItemChanged(0, HEADER_LISTENER_CHANGED);
     }
 
     public int getSpeakerCount() {

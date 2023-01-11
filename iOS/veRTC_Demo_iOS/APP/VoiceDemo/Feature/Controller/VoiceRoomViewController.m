@@ -541,7 +541,7 @@
 
 - (void)addIMMessage:(BOOL)isJoin
            userModel:(VoiceControlUserModel *)userModel {
-    NSString *unitStr = isJoin ? @"加入了房间" : @"离开房间";
+    NSString *unitStr = isJoin ? @"加入了房间" : @"退出了房间";
     BaseIMModel *imModel = [[BaseIMModel alloc] init];
     imModel.message = [NSString stringWithFormat:@"%@ %@", userModel.name, unitStr];
     [self.imComponent addIM:imModel];

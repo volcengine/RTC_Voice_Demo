@@ -26,6 +26,7 @@ import com.volcengine.vertcdemo.core.net.rts.RTCRoomEventHandlerWithRTS;
 import com.volcengine.vertcdemo.core.net.rts.RTCVideoEventHandlerWithRTS;
 import com.volcengine.vertcdemo.core.net.rts.RTSInfo;
 import com.volcengine.vertcdemo.voice.event.SDKAudioPropertiesEvent;
+import com.volcengine.vertcdemo.voice.event.VoiceReconnectToRoomEvent;
 import com.volcengine.vertcdemo.voice.event.SDKStreamStatsEvent;
 
 import java.util.ArrayList;
@@ -111,6 +112,8 @@ public class VoiceRTCManager {
             Log.d(TAG, String.format("onRoomStateChanged: %s, %s, %d, %s", roomId, uid, state, extraInfo));
             if (isFirstJoinRoomSuccess(state, extraInfo)) {
                 SolutionDemoEventManager.post(new SDKJoinChannelSuccessEvent(roomId, uid));
+            } else {
+                SolutionDemoEventManager.post(new VoiceReconnectToRoomEvent());
             }
         }
 
@@ -165,7 +168,7 @@ public class VoiceRTCManager {
             mRTCVideo.setBusinessId(info.bid);
             mRTSClient = new VoiceRTSClient(mRTCVideo, info);
             mRTCVideoEventHandler.setBaseClient(mRTSClient);
-            enableLocalAudio(true);
+            enableLocalAudio(false);
             setRemoteSubscribeFallbackOption(SUBSCRIBE_FALLBACK_OPTIONS_AUDIO_ONLY);
             enableAudioVolumeIndication(VOLUME_INTERVAL_MS, VOLUME_SMOOTH);
         }
@@ -199,6 +202,10 @@ public class VoiceRTCManager {
         }
     }
 
+    /**
+     * 开启音频采集
+     * @param enable 开启采集
+     */
     public static void enableLocalAudio(boolean enable) {
         MLog.d(TAG, "enableLocalAudio: " + enable);
         if (mRTCVideo == null) {
@@ -221,7 +228,7 @@ public class VoiceRTCManager {
         mRTCRoom.setRTCRoomEventHandler(mRTCRoomEventHandler);
         mRTCRoomEventHandler.setBaseClient(mRTSClient);
         UserInfo userInfo = new UserInfo(uid, null);
-        RTCRoomConfig roomConfig = new RTCRoomConfig(ChannelProfile.CHANNEL_PROFILE_COMMUNICATION,
+        RTCRoomConfig roomConfig = new RTCRoomConfig(ChannelProfile.CHANNEL_PROFILE_INTERACTIVE_PODCAST,
                 true, true, false);
         mRTCRoom.joinRoom(token, userInfo, roomConfig);
     }

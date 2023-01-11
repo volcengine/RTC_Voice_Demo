@@ -1,7 +1,5 @@
 package com.volcengine.vertcdemo.voice.feature.chatroommain;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -14,8 +12,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +33,7 @@ import com.volcengine.vertcdemo.voice.bean.ChatUserInfo;
 import com.volcengine.vertcdemo.voice.bean.CreateJoinRoomResult;
 import com.volcengine.vertcdemo.voice.bean.HostChangeInfo;
 import com.volcengine.vertcdemo.voice.bean.UserStatus;
+import com.volcengine.vertcdemo.voice.bean.VoiceReconnectResult;
 import com.volcengine.vertcdemo.voice.core.Constants;
 import com.volcengine.vertcdemo.voice.core.VoiceDataManger;
 import com.volcengine.vertcdemo.voice.core.VoiceRTCManager;
@@ -51,6 +48,7 @@ import com.volcengine.vertcdemo.voice.event.MuteMicEvent;
 import com.volcengine.vertcdemo.voice.event.UserRaiseHandsEvent;
 import com.volcengine.vertcdemo.voice.event.SDKAudioPropertiesEvent;
 import com.volcengine.vertcdemo.voice.event.UnmuteMicEvent;
+import com.volcengine.vertcdemo.voice.event.VoiceReconnectToRoomEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -169,7 +167,7 @@ public class ChatRoomActivity extends BaseActivity {
         mMuteLocalLayout = findViewById(R.id.voice_chat_room_mute_local_layout);
         mMicStatusIv = findViewById(R.id.voice_chat_room_mute_local_btn);
         mMicStatusTv = findViewById(R.id.voice_chat_room_mute_local_txt);
-        mMicStatusIv.setOnClickListener((v) -> switchMic(!mIsOpen));
+        mMicStatusIv.setOnClickListener((v) -> publishMic(!mIsOpen));
 
 
         RecyclerView userRv = findViewById(R.id.layout_room_user_rv);
@@ -249,13 +247,17 @@ public class ChatRoomActivity extends BaseActivity {
         WindowUtils.setLayoutFullScreen(getWindow());
     }
 
-    private void switchMic(boolean isOpen) {
-        mIsOpen = isOpen;
-        mMicStatusIv.setImageResource(isOpen ? R.drawable.voice_audio_enable : R.drawable.voice_audio_disable);
-        mMicStatusTv.setText(isOpen ? "静音自己" : "取消静音");
+    /**
+     * 控制音频流发送
+     * @param publish 发送
+     */
+    private void publishMic(boolean publish) {
+        mIsOpen = publish;
+        mMicStatusIv.setImageResource(publish ? R.drawable.voice_audio_enable : R.drawable.voice_audio_disable);
+        mMicStatusTv.setText(publish ? "静音自己" : "取消静音");
         VoiceRTSClient rtmClient = VoiceRTCManager.getRTSClient();
-        if (rtmClient != null){
-            rtmClient.switchMic(isOpen);
+        if (rtmClient != null) {
+            rtmClient.switchMic(publish);
         }
     }
 
@@ -274,21 +276,13 @@ public class ChatRoomActivity extends BaseActivity {
         SolutionDemoEventManager.unregister(this);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PERMISSION_GRANTED) {
-            switchMic(true);
-        }
-    }
-
     public void attemptLeaveRoom() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ChatRoomActivity.this, R.style.transparentDialog);
         View view = getLayoutInflater().inflate(R.layout.layout_leave_voice_room, null);
         builder.setView(view);
-        TextView titleTv = view.findViewById(R.id.leave_meeting_title);
-        TextView confirmTv = view.findViewById(R.id.leave_meeting_confirm);
-        TextView cancelTv = view.findViewById(R.id.leave_meeting_cancel);
+        TextView titleTv = view.findViewById(R.id.leave_chat_title);
+        TextView confirmTv = view.findViewById(R.id.leave_chat_confirm);
+        TextView cancelTv = view.findViewById(R.id.leave_chat_cancel);
         builder.setCancelable(true);
         final AlertDialog dialog = builder.create();
         if (isHost()) {
@@ -442,7 +436,7 @@ public class ChatRoomActivity extends BaseActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onCSJoinMeetingEvent(JoinChatEvent event) {
+    public void onJoinRoomEvent(JoinChatEvent event) {
         if (VoiceDataManger.isSelf(event.user.userId)) {
             return;
         }
@@ -454,12 +448,12 @@ public class ChatRoomActivity extends BaseActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onCSLeaveMeetingEvent(LeaveChatEvent event) {
+    public void onLeaveChatEvent(LeaveChatEvent event) {
         if (VoiceDataManger.isSelf(event.user.userId)) {
             return;
         }
         ChatMsgInfo info = new ChatMsgInfo();
-        info.content = event.user.userName + "  离开了房间";
+        info.content = event.user.userName + "  退出了房间";
         mChatRoomChatAdapter.addChatMsgInfo(info);
         mChatRoomAdapter.removeUser(event.user);
         mChatRv.post(() -> mChatRv.smoothScrollToPosition(mChatRoomChatAdapter.getItemCount()));
@@ -488,7 +482,8 @@ public class ChatRoomActivity extends BaseActivity {
             mEnterTs = System.currentTimeMillis();
             mRoomIdTv.setText(event.info.roomId);
             VoiceRTCManager.joinRoom(event.token, event.info.roomId, mUserId);
-            switchMic(mIsOpen);
+            VoiceRTCManager.enableLocalAudio(isHost());
+            publishMic(mIsOpen && isHost());
             startCounting();
 
             updateUI();
@@ -544,7 +539,8 @@ public class ChatRoomActivity extends BaseActivity {
             showToast("您已经成功上麦", true);
             mIsSpeaker = true;
             mIsRaiseHand = false;
-            switchMic(true);
+            VoiceRTCManager.enableLocalAudio(true);
+            publishMic(true);
         }
         mChatRoomAdapter.onUserRoleChange(event.user.userId, true);
         updateUI();
@@ -561,14 +557,15 @@ public class ChatRoomActivity extends BaseActivity {
         if (TextUtils.equals(event.userId, mUserId)) {
             showToast("您已回到听众席", true);
             mIsSpeaker = false;
-            switchMic(false);
+            VoiceRTCManager.enableLocalAudio(false);
+            publishMic(false);
         }
         mChatRoomAdapter.onUserRoleChange(event.userId, false);
         updateUI();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onCSMeetingEndEvent(ChatEndEvent event) {
+    public void onChatEndEvent(ChatEndEvent event) {
         SafeToast.show("房间已解散");
         leaveRoom();
         finish();
@@ -604,6 +601,9 @@ public class ChatRoomActivity extends BaseActivity {
     public void onCSHostChangeEvent(HostChangeInfo event) {
         if (event.hostInfo != null && !TextUtils.isEmpty(event.hostInfo.userId)) {
             mHostUserId = event.hostInfo.userId;
+            if (TextUtils.equals(mHostUserId, SolutionDataManager.ins().getUserId())) {
+                SafeToast.show(R.string.self_become_host);
+            }
         }
         if (TextUtils.equals(mUserId, event.hostInfo == null ? null : event.hostInfo.userId)) {
             mIsSomeoneRaiseHand = false;
@@ -616,4 +616,25 @@ public class ChatRoomActivity extends BaseActivity {
         leaveRoom();
         finish();
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onReconnectEvent(VoiceReconnectToRoomEvent event) {
+        String roomId = getIntent().getStringExtra(Constants.EXTRA_KEY_CHAT_ROOM_ID);
+        VoiceRTCManager.getRTSClient().requestReconnect(roomId, mReconnectCallback);
+    }
+
+    /**
+     * 向业务服务器请求重连进当前房间接口的回调，用于服务端控制房间人数
+     */
+    private final IRequestCallback<VoiceReconnectResult> mReconnectCallback = new IRequestCallback<VoiceReconnectResult>() {
+        @Override
+        public void onSuccess(VoiceReconnectResult data) {
+
+        }
+
+        @Override
+        public void onError(int errorCode, String message) {
+            finish();
+        }
+    };
 }

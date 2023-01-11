@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.google.gson.JsonObject;
 import com.ss.bytertc.engine.RTCVideo;
 import com.ss.video.rtc.demo.basic_module.utils.AppExecutors;
+import com.ss.video.rtc.demo.basic_module.utils.SafeToast;
 import com.volcengine.vertcdemo.common.AbsBroadcast;
 import com.volcengine.vertcdemo.core.SolutionDataManager;
 import com.volcengine.vertcdemo.core.eventbus.SolutionDemoEventManager;
@@ -14,6 +15,7 @@ import com.volcengine.vertcdemo.core.net.IRequestCallback;
 import com.volcengine.vertcdemo.core.net.rts.RTSBaseClient;
 import com.volcengine.vertcdemo.core.net.rts.RTSBizInform;
 import com.volcengine.vertcdemo.core.net.rts.RTSInfo;
+import com.volcengine.vertcdemo.voice.R;
 import com.volcengine.vertcdemo.voice.bean.ChatRoomInfo;
 import com.volcengine.vertcdemo.voice.bean.ChatUserInfo;
 import com.volcengine.vertcdemo.voice.bean.CreateJoinRoomResult;
@@ -21,6 +23,7 @@ import com.volcengine.vertcdemo.voice.bean.GetUserList;
 import com.volcengine.vertcdemo.voice.bean.HostChangeInfo;
 import com.volcengine.vertcdemo.voice.bean.RoomListInfo;
 import com.volcengine.vertcdemo.voice.bean.UserStatus;
+import com.volcengine.vertcdemo.voice.bean.VoiceReconnectResult;
 import com.volcengine.vertcdemo.voice.bean.VoiceResponse;
 import com.volcengine.vertcdemo.voice.event.ChatEndEvent;
 import com.volcengine.vertcdemo.voice.event.InviteMicEvent;
@@ -49,6 +52,7 @@ public class VoiceRTSClient extends RTSBaseClient {
     private static final String INVITE_MIC = "csInviteMic";
     private static final String MUTE_MIC = "csMuteMic";
     private static final String UNMUTE_MIC = "csUnmuteMic";
+    private static final String CMD_VIDEO_CALL_RECONNECT = "csReconnect";
 
     public VoiceRTSClient(@NonNull RTCVideo rtcVideo, @NonNull RTSInfo rtmInfo) {
         super(rtcVideo, rtmInfo);
@@ -119,18 +123,32 @@ public class VoiceRTSClient extends RTSBaseClient {
             return;
         }
         int status = info.userStatus;
-        String cmd = null;
+        final String cmd;
         if (status == UserStatus.UserStatusOnMicrophone.getStatus()) {
             cmd = OFF_MIC;
         } else if (status == UserStatus.UserStatusRaiseHands.getStatus()) {
             cmd = AGREE_MIC;
         } else if (status == UserStatus.UserStatusAudience.getStatus()) {
             cmd = INVITE_MIC;
+        } else {
+            cmd = null;
         }
 
         JsonObject params = getCommonParams(cmd);
         params.addProperty("user_id", info.userId);
-        sendServerMessageOnNetwork(getRoomId(), params, VoiceResponse.class, null);
+        sendServerMessageOnNetwork(getRoomId(), params, VoiceResponse.class, new IRequestCallback<VoiceResponse>() {
+            @Override
+            public void onSuccess(VoiceResponse data) {
+                if (TextUtils.equals(cmd, INVITE_MIC)) {
+                    SafeToast.show(R.string.voice_invite_success);
+                }
+            }
+
+            @Override
+            public void onError(int errorCode, String message) {
+                SafeToast.show(R.string.voice_invite_failed);
+            }
+        });
     }
 
     public void switchMic(boolean isOn) {
@@ -213,6 +231,12 @@ public class VoiceRTSClient extends RTSBaseClient {
 
         putEventListener(new AbsBroadcast<>(ON_HOST_CHANGE, HostChangeInfo.class,
                 SolutionDemoEventManager::post));
+    }
+
+    public void requestReconnect(String roomId, IRequestCallback<VoiceReconnectResult> callback) {
+        JsonObject content = getCommonParams(CMD_VIDEO_CALL_RECONNECT);
+        content.addProperty("room_id", roomId);
+        sendServerMessageOnNetwork(roomId, content, VoiceReconnectResult.class, callback);
     }
 
     private void putEventListener(AbsBroadcast<? extends RTSBizInform> absBroadcast) {

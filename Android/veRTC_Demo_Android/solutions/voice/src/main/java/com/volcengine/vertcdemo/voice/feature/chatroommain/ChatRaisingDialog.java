@@ -186,31 +186,18 @@ public class ChatRaisingDialog extends AppCompatDialog {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCSRaiseHandsMicEvent(UserRaiseHandsEvent event) {
-        ChatUserInfo info = mListenerAdapter.removeUser(event.userId);
-        if (info != null) {
-            mRaiseAdapter.addUser(info);
-        }
-        mRaiseAdapter.updateUserStatusChanged(event.userId, UserStatus.UserStatusRaiseHands.getStatus());
+        initData();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCSMicOnEvent(MicOnEvent event) {
-        ChatUserInfo info = mListenerAdapter.removeUser(event.user.userId);
-        if (info != null) {
-            mRaiseAdapter.addUser(info);
-        }
-        mRaiseAdapter.updateUserStatusChanged(event.user.userId, UserStatus.UserStatusOnMicrophone.getStatus());
+        initData();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCSMicOffEvent(MicOffEvent event) {
-        ChatUserInfo info = mRaiseAdapter.removeUser(event.userId);
-        if (info != null) {
-            mListenerAdapter.addUser(info);
-        }
-        mListenerAdapter.updateUserStatusChanged(event.userId, UserStatus.UserStatusAudience.getStatus());
+        initData();
     }
-
 
     private static class RaisingAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
