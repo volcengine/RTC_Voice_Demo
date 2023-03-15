@@ -241,6 +241,12 @@ public class VoiceRTCManager {
         }
     }
 
+    public static void stopAudioCapture() {
+        if (mRTCVideo != null) {
+            mRTCVideo.stopAudioCapture();
+        }
+    }
+
     public static void enableAudioVolumeIndication(int interval, int smooth) {
         MLog.d(TAG, String.format(Locale.ENGLISH, "enableAudioVolumeIndication : %d  %d", interval, smooth));
         if (mRTCVideo == null) {

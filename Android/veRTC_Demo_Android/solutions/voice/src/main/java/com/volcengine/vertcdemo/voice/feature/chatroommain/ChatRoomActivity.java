@@ -311,6 +311,7 @@ public class ChatRoomActivity extends BaseActivity {
             rtmClient.requestLeaveRoom();
         }
         VoiceRTCManager.leaveRoom();
+        VoiceRTCManager.stopAudioCapture();
     }
 
     private void openRaisingList() {
