@@ -1,0 +1,98 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="25dp"
+    tools:background="#000">
+
+    <com.volcengine.vertcdemo.common.CommonTitleLayout
+        android:id="@+id/title_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="42dp"
+            android:layout_marginTop="60dp"
+            android:layout_marginRight="42dp"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/create_chat_room_title_et"
+                style="@style/EditTextLg"
+                android:layout_width="match_parent"
+                android:hint="请输入房间主题"
+                android:lines="1"
+                android:maxLines="1"
+                android:maxLength="20"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textColorHint="#86909C" />
+
+            <View
+                style="@style/DividerLine"
+                android:layout_marginTop="10dp"
+                android:background="#86909C" />
+
+            <TextView
+                android:id="@+id/create_chat_room_title_waring_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/login_input_room_name_waring"
+                android:textColor="#F65656"
+                android:textSize="14sp"
+                android:visibility="invisible" />
+
+            <EditText
+                android:id="@+id/create_chat_room_id_et"
+                style="@style/EditTextLg"
+                android:layout_width="match_parent"
+                android:layout_marginTop="20dp"
+                android:hint="请输入用户昵称"
+                android:lines="1"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textColorHint="#86909C" />
+
+            <View
+                style="@style/DividerLine"
+                android:layout_marginTop="10dp"
+                android:background="#86909C" />
+
+            <TextView
+                android:id="@+id/create_chat_room_id_waring_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/login_input_meeting_id_waring"
+                android:textColor="#F65656"
+                android:textSize="14sp"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/create_chat_room_btn"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="30dp"
+            android:background="@drawable/create_chat_room_btn_bg"
+            android:gravity="center"
+            android:text="进入房间"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+    </LinearLayout>
+</FrameLayout>
