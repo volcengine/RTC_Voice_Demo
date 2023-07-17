@@ -73,6 +73,13 @@
         [self.rtcEngineKit startAudioCapture];
         [self.rtcRoom publishStream:ByteRTCMediaStreamTypeAudio];
     } else {
+        // clear local stats value
+        self.paramInfoModel.numChannels = @"0";
+        self.paramInfoModel.sentSampleRate = @"0";
+        self.paramInfoModel.sentKBitrate = @"0";
+        self.paramInfoModel.audioLossRate = @"0";
+        self.paramInfoModel.rtt = @"0";
+        [self updateRoomParamInfoModel];
         [self.rtcRoom setUserVisibility:NO];
         [self.rtcEngineKit stopAudioCapture];
     }
@@ -91,6 +98,7 @@
 - (void)leaveRTCRoom {
     //离开频道
     //Leave the channel
+    _paramInfoModel = nil;
     [self makeCoHost:NO];
     [self muteLocalAudioStream:YES];
     [self.rtcRoom leaveRoom];
